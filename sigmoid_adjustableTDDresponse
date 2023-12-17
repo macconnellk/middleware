@@ -15,17 +15,18 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const as_min = profile.autosens_min;
     const autosens_interval = profile.autosens_max - as_min;
     
-// DYNISF SIGMOID MODIFICAtION #1
-// Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach
-// OLD SIGMOID APPROACH: const tdd_factor = tdd_averages.weightedAverage / tdd_averages.average_total_data;
+// DYNISF SIGMOID MODIFICATION #1
+// Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
+// This TDD delta effect is not linear across BGs and requires a curve to mimic.
+// ORIGINAL SIGMOID APPROACH: const tdd_factor = tdd_averages.weightedAverage / tdd_averages.average_total_data;
 
     // Define TDD deviation variable for use in TDD Sigmoid curve based on current percent change between Daily TDD deviation and 2 Week Deviation 
     // This approach will normalize this variable for any TDD value to ensure a standard TDD Factor sigmoid curve for all users
     const tdd_dev = (tdd_averages.weightedAverage / tdd_averages.average_total_data - 1) * 10;
 
     // Hard-code TDD Factor Sigmoid inputs
-    // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect used in the Chris Wilson DynISF approach. 
-    // These inputs are not expected to require user change. 
+    // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect for FIASP used in the Chris Wilson (Logarithmic) DynISF approach. 
+    // These inputs are not expected to require user change for ultra-rapid insulin
     const TDD_sigmoid_adjustment_factor = .39;
     const TDD_sigmoid_max = 4;
     const TDD_sigmoid_min = .7;
@@ -39,9 +40,15 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // The TDD Factor sigmoid function
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigoid_exponent)) + TDD_sigmoid_min;
 
-    // DYNISF SIGMOID MODIFICAtION #2
-    //Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
-    const bg_dev = (current_bg - profile.min_bg) * 0.0555;
+    // DYNISF SIGMOID MODIFICATION #2
+    // The TDD delta effect in Chris Wilson (Logarithmic) DynISF approach allows ISF to shift above 100% below target BG (unlike the original Sigmoid approach). 
+    // This approach applies the TTD factor to the target BG to allow the new TDD delta approach to mimic the Chris Wilson (Logarithmic) DynISF approach 
+    // Like the original Sigmoid approach, Profile ISF will be applied at target but only when Daily TDD = 2 Week TDD. 
+    // Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
+    // ORIGINAL SIGMOID APPROACH" const bg_dev = (current_bg - profile.min_bg) * 0.0555;
+
+        const bg_dev = (current_bg - (profile.min_bg / tdd_factor) * 0.0555;
+
 
 // The Dynamic ISF Sigmoid Code 
 
