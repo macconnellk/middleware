@@ -25,14 +25,14 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const tdd_dev = (tdd_averages.weightedAverage / tdd_averages.average_total_data - 1) * 10;
 
     // Hard-code TDD Factor Sigmoid inputs
-    // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect for FIASP used in the Chris Wilson (Logarithmic) DynISF approach. 
-    // These inputs are not expected to require user change for ultra-rapid insulin
+    // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect for ULTRA-RAPID used in the Chris Wilson (Logarithmic) DynISF approach. 
+    // These inputs are not expected to require user change for ultra-rapid insulin; instead the strength of this factor can be modified below using the tdd_factor_strength_slider.
     const TDD_sigmoid_adjustment_factor = .39;
     const TDD_sigmoid_max = 4;
     const TDD_sigmoid_min = .7;
 
     // Define a TDD Factor Sigmoid curve using same method as the DynISF Sigmoid approach below
-    const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min
+    const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
     const TDD_sigmoid_max_minus_one = TDD_sigmoid_max - 1;
     const TDD_sigmoid_fix_offset = (Math.log10(1/TDD_sigmoid_max_minus_one - TDD_sigmoid_min / TDD_sigmoid_max_minus_one) / Math.log10(Math.E));
     const TDD_sigoid_exponent = tdd_dev * TDD_sigmoid_adjustment_factor + fix_offset;
@@ -40,14 +40,20 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // The TDD Factor sigmoid function
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigoid_exponent)) + TDD_sigmoid_min;
 
-    // DYNISF SIGMOID MODIFICATION #2
-    // The TDD delta effect in Chris Wilson (Logarithmic) DynISF approach allows ISF to shift above 100% below target BG (unlike the original Sigmoid approach). 
-    // This approach applies the TTD factor to the target BG to allow the new TDD delta approach to mimic the Chris Wilson (Logarithmic) DynISF approach 
-    // Like the original Sigmoid approach, Profile ISF will be applied at target but only when Daily TDD = 2 Week TDD. 
-    // Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
-    // ORIGINAL SIGMOID APPROACH" const bg_dev = (current_bg - profile.min_bg) * 0.0555;
+    // Adjust the stregnth of the TDD Factor; 100% = similar TDD delta effect to Chris Wilson (Logarithmic) DynISF, 50% = half the effect, etc.
+    const tdd_factor_strength_slider = 100%;
 
-        const bg_dev = (current_bg - (profile.min_bg / tdd_factor) * 0.0555;
+    // The user adjusted TDD factor based on above % slider
+    const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
+
+    // DYNISF SIGMOID MODIFICATION #2
+    // The TDD delta effect in Chris Wilson (Logarithmic) DynISF approach allows ISF to shift below target BG (unlike the original Sigmoid approach). 
+    // The following math applies the new TTD factor to the target BG to allow ISF to shift even below target BG when daily TDD rises above 2 week TDD.
+    // Like the original Sigmoid approach, Profile ISF will be applied at target but only when Daily TDD = 2 Week TDD. 
+    // ORIGINAL SIGMOID APPROACH: Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
+    // ORIGINAL SIGMOID APPROACH: const bg_dev = (current_bg - profile.min_bg) * 0.0555;
+
+        const bg_dev = (current_bg - (profile.min_bg / modified_tdd_factor) * 0.0555;
 
 
 // The Dynamic ISF Sigmoid Code 
@@ -60,7 +66,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const fix_offset = (Math.log10(1/max_minus_one-as_min/max_minus_one) / Math.log10(Math.E));
    
     //Exponent used in sigmoid formula
-    const exponent = bg_dev * adjustment_factor * tdd_factor + fix_offset;
+    const exponent = bg_dev * adjustment_factor * modified_tdd_factor + fix_offset;
   
     // The sigmoid function
     const sigmoid_factor = autosens_interval / (1 + Math.exp(-exponent)) + as_min;
