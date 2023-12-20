@@ -10,9 +10,13 @@ function middlewaremiddleware(iob, currenttemp, glucose, profile, autosens, meal
     const enable_sigmoidTDD = true;
    
 // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
-// Initialize varables with profile and BG settings settings 
     const dyn_enabled = profile.useNewFormula;
     const sigmoid_enabled = profile.sigmoid;
+   
+//Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
+    if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
+
+// Initialize varables with profile and BG settings settings 
     const current_bg = glucose[0].glucose;
     const as_min = profile.autosens_min;
     const autosens_interval = profile.autosens_max - as_min;
@@ -73,9 +77,6 @@ function middlewaremiddleware(iob, currenttemp, glucose, profile, autosens, meal
   
     // The sigmoid function
     const sigmoid_factor = autosens_interval / (1 + Math.exp(-exponent)) + as_min;
-    
-    //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
-    if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
 
     // Replace the autosens.ratio with this calculation
         autosens.ratio = sigmoid_factor;
