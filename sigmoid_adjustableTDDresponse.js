@@ -72,7 +72,6 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
 // The Dynamic ISF Sigmoid Code 
 
-   if (enable_sigmoidTDD) {  
       const minimumRatio = profile.autosens_min;
       const maximumRatio = profile.autosens_max;
       const ratioInterval = maximumRatio - minimumRatio;
@@ -101,8 +100,7 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
-       }
-      
+       
     const normal_cr = profile.carb_ratio;
 
         // Dynamic CR. Use only when the setting 'Enable Dyanmic CR' is on in FAX Dynamic Settings
