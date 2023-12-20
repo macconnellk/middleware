@@ -101,7 +101,8 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
-       
+       }
+      
     const normal_cr = profile.carb_ratio;
 
         // Dynamic CR. Use only when the setting 'Enable Dyanmic CR' is on in FAX Dynamic Settings
