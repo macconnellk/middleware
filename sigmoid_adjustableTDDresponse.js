@@ -44,7 +44,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 
     // Define TDD deviation variable for use in TDD Sigmoid curve based on current percent change between Daily TDD deviation and 2 Week Deviation 
     // This approach will normalize this variable for any TDD value to ensure a standard TDD Factor sigmoid curve for all users
-    const tdd_dev = (tdd_averages.weightedAverage / tdd_averages.average_total_data - 1) * 10;
+    const tdd_dev = (oref2_variables.weightedAverage / oref2_variables.average_total_data - 1) * 10;
 
     // Hard-code TDD Factor Sigmoid inputs
     // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect for ULTRA-RAPID used in the Chris Wilson (Logarithmic) DynISF approach. 
