@@ -73,8 +73,8 @@ function middlewaremiddleware(iob, currenttemp, glucose, profile, autosens, meal
     // The sigmoid function
     const sigmoid_factor = autosens_interval / (1 + Math.exp(-exponent)) + as_min;
     
-    //Only use when dynISF setting is off and the constant enable_sigmoid = true.
-    if (enable_sigmoid && !dyn_enabled) { 
+    //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
+    if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
 
     // Replace the autosens.ratio with this calculation
         autosens.ratio = sigmoid_factor;
