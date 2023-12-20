@@ -64,7 +64,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigmoid_exponent)) + TDD_sigmoid_min;
 
     // Adjust the stregnth of the TDD Factor; 100% = FULL TDD delta effect similar to Chris Wilson (Logarithmic) DynISF, 50% = half the effect, etc.
-    const tdd_factor_strength_slider = 100%;
+    const tdd_factor_strength_slider = 1;
 
     // The user adjusted TDD factor based on above % slider
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
