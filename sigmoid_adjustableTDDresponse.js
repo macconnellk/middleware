@@ -1,25 +1,41 @@
-function middlewaremiddleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock, pumphistory, preferences, basalprofile, oref2_variables) {
+function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock, pumphistory, preferences, basalprofile, oref2_variables) {
 
-    function round(value, digits) {
+   function round(value, digits) {
         if (! digits) { digits = 0; }
         var scale = Math.pow(10, digits);
         return Math.round(value * scale) / scale; 
-    }
-
-// Change to false if you don't want to use sigmoid ISF adjustment anymore. Sigmoid ISF will not be used when dynamic ISF setting is on. 
-    const enable_sigmoidTDD = true;
-   
+    }   
+    
+//Turn on or off
+  var enable_sigmoidTDD = true;
+ 
 // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
     const dyn_enabled = profile.useNewFormula;
     const sigmoid_enabled = profile.sigmoid;
+    const enableDynCR = profile.enableDynamicCR;
+
+  const myGlucose = glucose[0].glucose;
+  const minimumRatio = profile.autosens_min;
+  const maximumRatio = profile.autosens_max;
+  var exerciseSetting = false;
+  const target = profile.min_bg;
+  const adjustmentFactor = profile.adjustmentFactor;
+  
+  // Guards
+  if (minimumRatio == maximumRatio) {
+     enable_sigmoidTDD = false;
+  }
+  if (profile.high_temptarget_raises_sensitivity || profile.exercise_mode || oref2_variables.isEnabled) {
+    exerciseSetting = true;
+  }
+  if (target >= 118 && exerciseSetting) {
+      enable_sigmoidTDD = false;
+  }
+    
+// Sigmoid Function
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
     if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
-
-// Initialize varables with profile and BG settings settings 
-    const current_bg = glucose[0].glucose;
-    const as_min = profile.autosens_min;
-    const autosens_interval = profile.autosens_max - as_min;
     
 // DYNISF SIGMOID MODIFICATION #1
 // Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
@@ -53,39 +69,45 @@ function middlewaremiddleware(iob, currenttemp, glucose, profile, autosens, meal
     // The user adjusted TDD factor based on above % slider
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
 
-    // DYNISF SIGMOID MODIFICATION #2
+
+// The Dynamic ISF Sigmoid Code 
+
+   if (enable_sigmoidTDD) {  
+      const minimumRatio = profile.autosens_min;
+      const maximumRatio = profile.autosens_max;
+      const ratioInterval = maximumRatio - minimumRatio;
+       var max_minus_one = maximumRatio - 1;
+
+      // DYNISF SIGMOID MODIFICATION #2
     // The TDD delta effect in Chris Wilson (Logarithmic) DynISF approach allows ISF to shift when BG is below target BG (unlike the original Sigmoid DynamicISF approach). 
     // The following math applies the new TTD factor to the target BG to this shift.
     // Like the original Sigmoid approach, Profile ISF will be applied at target but only when Daily TDD = 2 Week TDD. 
     // ORIGINAL SIGMOID APPROACH: Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
     // ORIGINAL SIGMOID APPROACH: const bg_dev = (current_bg - profile.min_bg) * 0.0555;
 
-        const bg_dev = (current_bg - (profile.min_bg / modified_tdd_factor) * 0.0555;
+    const deviation = (myGlucose - (target / modified_tdd_factor) * 0.0555; 
+       
+     //Makes sigmoid factor(y) = 1 when BG deviation(x) = 0.
+     const fix_offset = (Math.log10(1/max_minus_one-minimumRatio/max_minus_one) / Math.log10(Math.E));
+       
+     //Exponent used in sigmoid formula
+     const exponent = deviation * adjustment_factor * modified_tdd_factor + fix_offset;
+       
+     // The sigmoid function
+     var sigmoidFactor = ratioInterval / (1 + Math.exp(-exponent)) + minimumRatio;
+       
+     //Respect min/max ratios
+     sigmoidFactor = Math.max(Math.min(maximumRatio, sigmoidFactor), sigmoidFactor, minimumRatio);
 
+      // Sets the new ratio
+     autosens.ratio = sigmoidFactor;
+       
+    const normal_cr = profile.carb_ratio;
 
-// The Dynamic ISF Sigmoid Code 
-
-    // Reduce to make less aggressive
-    const adjustment_factor = profile.adjustmentFactor;
-    const max_minus_one = profile.autosens_max - 1;
-    
-    //Makes sigmoid factor(y) = 1 when BG deviation(x) = 0.
-    const fix_offset = (Math.log10(1/max_minus_one-as_min/max_minus_one) / Math.log10(Math.E));
-   
-    //Exponent used in sigmoid formula
-    const exponent = bg_dev * adjustment_factor * modified_tdd_factor + fix_offset;
-  
-    // The sigmoid function
-    const sigmoid_factor = autosens_interval / (1 + Math.exp(-exponent)) + as_min;
-
-    // Replace the autosens.ratio with this calculation
-        autosens.ratio = sigmoid_factor;
-        const normal_cr = profile.carb_ratio;
-
-    // Dynamic CR. Use only when the setting 'Enable Dyanmic CR' is on in FAX Dynamic Settings
-        if (autosens.ratio > 1 && profile.enableDynamicCR) {
+        // Dynamic CR. Use only when the setting 'Enable Dyanmic CR' is on in FAX Dynamic Settings
+        if (autosens.ratio > 1 && enableDynCR) {
             profile.carb_ratio /= ((autosens.ratio - 1) / 2 + 1);
-        } else if (profile.enableDynamicCR) { profile.carb_ratio /= autosens.ratio; }
+        } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
         const new_isf = profile.sens/autosens.ratio;
         
