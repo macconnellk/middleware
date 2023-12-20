@@ -85,7 +85,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // ORIGINAL SIGMOID APPROACH: Blood glucose deviation from set target (the lower BG target) converted to mmol/l to fit current formula. 
     // ORIGINAL SIGMOID APPROACH: const bg_dev = (current_bg - profile.min_bg) * 0.0555;
 
-    const deviation = (myGlucose - (target / modified_tdd_factor) * 0.0555; 
+    const deviation = (myGlucose - (target / modified_tdd_factor)) * 0.0555; 
        
      //Makes sigmoid factor(y) = 1 when BG deviation(x) = 0.
      const fix_offset = (Math.log10(1/max_minus_one-minimumRatio/max_minus_one) / Math.log10(Math.E));
