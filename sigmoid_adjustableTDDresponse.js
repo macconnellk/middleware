@@ -1,4 +1,4 @@
-function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir, clock-zoned, pumphistory-24h-zoned, preferences, basal_profile, oref2_variables) {
+function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir, preferences, basal_profile, oref2_variables) {
 
    function round(value, digits) {
         if (! digits) { digits = 0; }
