@@ -90,7 +90,7 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
      const fix_offset = (Math.log10(1/max_minus_one-minimumRatio/max_minus_one) / Math.log10(Math.E));
        
      //Exponent used in sigmoid formula
-     const exponent = deviation * adjustmentfactor * modified_tdd_factor + fix_offset;
+     const exponent = deviation * adjustmentFactor * modified_tdd_factor + fix_offset;
        
      // The sigmoid function
      var sigmoidFactor = ratioInterval / (1 + Math.exp(-exponent)) + minimumRatio;
