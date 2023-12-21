@@ -44,7 +44,6 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
    var log_exponent  = "";
    var log_sigmoidFactor  = "";
    var logminmax_sigmoidFactor  = "";
-   var log_autosens.ratio  = "";
    var log_normal_cr = "";
    var log_new_isf = "";
    
@@ -157,7 +156,6 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
-       log_autosens.ratio  = "Log: New autosens.ratio: " + autosens.ratio;
        
     const normal_cr = profile.carb_ratio;
       log_normal_cr = "Log: normal_cr: " + normal_cr;
