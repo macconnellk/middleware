@@ -22,6 +22,8 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
   const adjustmentFactor = profile.adjustmentFactor;
   
   //  Initialize log variables  
+   var log_weightedAverage = ""; 
+   var log_average_total_data = "";
    var log_tdd_dev = "";
    var log_TDD_sigmoid_adjustment_factor = "";
    var log_TDD_sigmoid_max = "";
@@ -69,7 +71,13 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
     // Define TDD deviation variable for use in TDD Sigmoid curve based on current percent change between Daily TDD deviation and 2 Week Deviation 
     // This approach will normalize this variable for any TDD value to ensure a standard TDD Factor sigmoid curve for all users
-    const tdd_dev = (oref2_variables.weightedAverage / oref2_variables.average_total_data - 1) * 10;
+
+   const tdd_weightedAverage = oref2_variables.weightedAverage;
+   const tdd_average_total_data = oref2_variables.average_total_data;
+      var log_weightedAverage = "Log: tdd_weightedAverage: " + tdd_weightedAverage; 
+      var log_average_total_data = "Log: tdd_average_total_data: " + tdd_average_total_data;
+    
+   const tdd_dev = (tdd_weightedAverage / tdd_average_total_data - 1) * 10;
     var log_tdd_dev = "Log: tdd_dev: " + tdd_dev;
 
     // Hard-code TDD Factor Sigmoid inputs
