@@ -21,7 +21,31 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
   const target = profile.min_bg;
   const adjustmentFactor = profile.adjustmentFactor;
   
-  // Guards
+  //  Initialize log variables  
+   var log_tdd_dev = "";
+   var log_TDD_sigmoid_adjustment_factor = "";
+   var log_TDD_sigmoid_max = "";
+   var log_TDD_sigmoid_min = "";
+   var log_TDD_sigmoid_interval = "";
+   var log_TDD_sigmoid_max_minus_one = "";
+   var log_TDD_sigmoid_fix_offset = "";
+   var log_TDD_sigmoid_exponent = "";
+   var log_tdd_factor = "";
+   var log_tdd_factor_strength_slider = "";
+   var log_modified_tdd_factor = "";
+   var log_minimumRatio = "";
+   var log_maximumRatio  = "";
+   var log_ratioInterval  = "";
+   var log_max_minus_one  = "";
+   var log_deviation  = ""; 
+   var log_fix_offset  = "";
+   var log_exponent  = "";
+   var log_sigmoidFactor  = "";
+   var logminmax_sigmoidFactor  = "";
+   var log_autosens.ratio  = "";
+   var log_normal_cr = "";
+   
+   // Guards
   if (minimumRatio == maximumRatio) {
      enable_sigmoidTDD = false;
   }
