@@ -58,7 +58,7 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
     const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
     const TDD_sigmoid_max_minus_one = TDD_sigmoid_max - 1;
     const TDD_sigmoid_fix_offset = (Math.log10(1/TDD_sigmoid_max_minus_one - TDD_sigmoid_min / TDD_sigmoid_max_minus_one) / Math.log10(Math.E));
-    const TDD_sigmoid_exponent = tdd_dev * TDD_sigmoid_adjustment_factor + fix_offset;
+    const TDD_sigmoid_exponent = tdd_dev * TDD_sigmoid_adjustment_factor + TDD_sigmoid_fix_offset;
     
     // The TDD Factor sigmoid function
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigmoid_exponent)) + TDD_sigmoid_min;
