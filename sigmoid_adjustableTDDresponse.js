@@ -79,9 +79,10 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
     const TDD_sigmoid_adjustment_factor = .42;
     const TDD_sigmoid_max = 4;
     const TDD_sigmoid_min = .7;
-      var log_TDD_sigmoid_adjustment_factor = "Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
-      var log_TDD_sigmoid_max = "Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
-      var log_TDD_sigmoid_min = "Log: TDD_sigmoid_min: " + TDD_sigmoid_min;
+      var log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
+      var log_TDD_sigmoid_max = ", Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
+      var log_TDD_sigmoid_min = ", Log: TDD_sigmoid_min: " + TDD_sigmoid_min;
+       return log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min = "";
 
     // Define a TDD Factor Sigmoid curve using same method as the DynISF Sigmoid approach below
     const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
