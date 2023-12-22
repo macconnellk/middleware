@@ -47,10 +47,6 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
    var log_date = oref2_variables.date;
    var log_isf = oref2_variables.isf;
    
-   return log_weightedAverage + log_average_total_data + log_duration + log_date + log_isf
-   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
-
-   
    
    // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
     const dyn_enabled = profile.useNewFormula;
@@ -88,7 +84,11 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
     if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
-    
+
+   return log_weightedAverage + log_average_total_data + log_duration + log_date + log_isf
+   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
+
+       
 // DYNISF SIGMOID MODIFICATION #1
 // Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
 // This TDD delta effect is not linear across BGs and requires a curve to mimic.
