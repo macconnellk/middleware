@@ -143,8 +143,6 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
 
 // The Dynamic ISF Sigmoid Code 
 
-      const minimumRatio = profile.autosens_min;
-      const maximumRatio = profile.autosens_max;
       const ratioInterval = maximumRatio - minimumRatio;
        var max_minus_one = maximumRatio - 1;
 
