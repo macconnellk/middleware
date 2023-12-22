@@ -1,27 +1,21 @@
-function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir, preferences, basal_profile, oref2_variables) {
+function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir, preferences, oref2_variables, basal_profile) {
 
    function round(value, digits) {
         if (! digits) { digits = 0; }
         var scale = Math.pow(10, digits);
         return Math.round(value * scale) / scale; 
     }   
-    
+   
 //Turn on or off
   var enable_sigmoidTDD = true;
- 
-// The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
-    const dyn_enabled = profile.useNewFormula;
-    const sigmoid_enabled = profile.sigmoid;
-    const enableDynCR = profile.enableDynamicCR;
 
-  const myGlucose = glucose[0].glucose;
-  const minimumRatio = profile.autosens_min;
-  const maximumRatio = profile.autosens_max;
-  var exerciseSetting = false;
-  const target = profile.min_bg;
-  const adjustmentFactor = profile.adjustmentFactor;
-  
-  //  Initialize log variables  
+   //  Initialize log variables  
+   var log_dyn_enabled = "";
+   var log_sigmoid_enabled = "";
+   var log_enableDynCR = "";
+   var log_myGlucose = "";
+   var log_target = "";
+   var log_adjustmentFactor = "";
    var log_weightedAverage = ""; 
    var log_average_total_data = "";
    var log_tdd_dev = "";
@@ -36,16 +30,39 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
    var log_tdd_factor_strength_slider = "";
    var log_modified_tdd_factor = "";
    var log_minimumRatio = "";
-   var log_maximumRatio  = "";
+   var log_maximumRatio = "";
    var log_ratioInterval  = "";
-   var log_max_minus_one  = "";
-   var log_deviation  = ""; 
-   var log_fix_offset  = "";
-   var log_exponent  = "";
-   var log_sigmoidFactor  = "";
-   var logminmax_sigmoidFactor  = "";
+   var log_max_minus_one = "";
+   var log_deviation = ""; 
+   var log_fix_offset = "";
+   var log_exponent = "";
+   var log_sigmoidFactor = "";
+   var logminmax_sigmoidFactor = "";
    var log_normal_cr = "";
    var log_new_isf = "";
+ 
+// The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
+    const dyn_enabled = profile.useNewFormula;
+    const sigmoid_enabled = profile.sigmoid;
+    const enableDynCR = profile.enableDynamicCR;
+         log_dyn_enabled = "Log: dyn_enabled: " + dyn_enabled;
+         log_sigmoid_enabled = ", Log: sigmoid_enabled: " + sigmoid_enabled;
+         log_enableDynCR = ", Log: enableDynCR: " + enableDynCR;
+   
+
+  const myGlucose = glucose[0].glucose;
+  const minimumRatio = profile.autosens_min;
+  const maximumRatio = profile.autosens_max;
+  var exerciseSetting = false;
+  const target = profile.min_bg;
+  const adjustmentFactor = profile.adjustmentFactor;
+         log_myGlucose = ", Log: myGlucose: " + myGlucose;
+         log_target = ", Log: target: " + target;
+         log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
+         log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
+         log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
+   
+return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio
    
    // Guards
   if (minimumRatio == maximumRatio) {
