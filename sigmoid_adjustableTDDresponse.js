@@ -71,8 +71,8 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
     // Define TDD deviation variable for use in TDD Sigmoid curve based on current percent change between Daily TDD deviation and 2 Week Deviation 
     // This approach will normalize this variable for any TDD value to ensure a standard TDD Factor sigmoid curve for all users
 
-   const tdd_weightedAverage = oref2_variables.weightedAverage;
-   const tdd_average_total_data = oref2_variables.average_total_data;
+   const tdd_weightedAverage = oref2_variables.isEnabled;
+   const tdd_average_total_data = oref2_variables.uamMinutes;
       log_weightedAverage = "Log: tdd_weightedAverage: " + tdd_weightedAverage; 
       log_average_total_data = "Log: tdd_average_total_data: " + tdd_average_total_data;
     
