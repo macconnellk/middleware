@@ -41,7 +41,18 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
    var log_normal_cr = "";
    var log_new_isf = "";
  
-// The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
+   log_weightedAverage = oref2_variables.weightedAverage;; 
+   log_average_total_data = oref2_variables.average_total_data;
+   var log_duration = oref2_variables.duration;
+   var log_date = oref2_variables.date;
+   var log_isf = oref2_variables.isf;
+   
+   return log_weightedAverage + log_average_total_data + log_duration + log_date + log_isf
+   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
+
+   
+   
+   // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
     const dyn_enabled = profile.useNewFormula;
     const sigmoid_enabled = profile.sigmoid;
     const enableDynCR = profile.enableDynamicCR;
@@ -86,8 +97,8 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
     // Define TDD deviation variable for use in TDD Sigmoid curve based on current percent change between Daily TDD deviation and 2 Week Deviation 
     // This approach will normalize this variable for any TDD value to ensure a standard TDD Factor sigmoid curve for all users
 
-   const tdd_weightedAverage = oref2_variables.isEnabled;
-   const tdd_average_total_data = oref2_variables.uamMinutes;
+   const tdd_weightedAverage = oref2_variables.weightedAverage;
+   const tdd_average_total_data = oref2_variables.average_total_data;
       log_weightedAverage = "Log: tdd_weightedAverage: " + tdd_weightedAverage; 
       log_average_total_data = "Log: tdd_average_total_data: " + tdd_average_total_data;
     
@@ -104,7 +115,7 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
       log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
       log_TDD_sigmoid_max = ", Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
       log_TDD_sigmoid_min = ", Log: TDD_sigmoid_min: " + TDD_sigmoid_min;
-       return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
+   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
 
     // Define a TDD Factor Sigmoid curve using same method as the DynISF Sigmoid approach below
     const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
