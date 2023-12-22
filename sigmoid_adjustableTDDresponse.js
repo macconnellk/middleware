@@ -61,9 +61,7 @@ function middleware(iob, temp_basal, glucose, profile, autosens, meal, reservoir
          log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
          log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
-   
-return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio
-   
+      
    // Guards
   if (minimumRatio == maximumRatio) {
      enable_sigmoidTDD = false;
@@ -106,7 +104,7 @@ return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose +
       log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
       log_TDD_sigmoid_max = ", Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
       log_TDD_sigmoid_min = ", Log: TDD_sigmoid_min: " + TDD_sigmoid_min;
-       return log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
+       return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
 
     // Define a TDD Factor Sigmoid curve using same method as the DynISF Sigmoid approach below
     const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
