@@ -42,6 +42,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    var log_new_isf = "";
    
    // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
+   // Initialize Dynamic Status Variables
     const dyn_enabled = profile.useNewFormula;
     const sigmoid_enabled = profile.sigmoid;
     const enableDynCR = profile.enableDynamicCR;
@@ -49,7 +50,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_sigmoid_enabled = ", Log: sigmoid_enabled: " + sigmoid_enabled;
          log_enableDynCR = ", Log: enableDynCR: " + enableDynCR;
    
-
+//  Initialize function variables
   const myGlucose = glucose[0].glucose;
   const minimumRatio = profile.autosens_min;
   const maximumRatio = profile.autosens_max;
@@ -61,6 +62,8 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    const duration = oref2_variables.duration;
    const date = oref2_variables.date;
    const isf = oref2_variables.isf;
+
+         //  Log function variables
          log_myGlucose = ", Log: myGlucose: " + myGlucose;
          log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
@@ -68,12 +71,12 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
          log_weightedAverage = "Log: weightedAverage: " + weightedAverage; 
          log_average_total_data = "Log: average_total_data: " + average_total_data;
-         var log_duration = "Log: durationa: " + duration;
+         var log_duration = "Log: duration: " + duration;
          var log_date = "Log: date: " + date;
          var log_isf = "Log: isf: " + isf;
          
 
-   // Guards
+// Establish Guards
   if (minimumRatio == maximumRatio) {
      enable_sigmoidTDD = false;
   }
@@ -89,6 +92,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
     if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
 
+   // Return Log to Test Function Operation
    return log_weightedAverage + log_average_total_data + log_duration + log_date + log_isf
    return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
 
