@@ -91,12 +91,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
     if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
-
-   // Return Log to Test Function Operation
-   return log_weightedAverage + log_average_total_data + log_duration + log_date + log_isf
-   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_weightedAverage + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
-
-       
+   
 // DYNISF SIGMOID MODIFICATION #1
 // Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
 // This TDD delta effect is not linear across BGs and requires a curve to mimic.
@@ -118,8 +113,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
       log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
       log_TDD_sigmoid_max = ", Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
       log_TDD_sigmoid_min = ", Log: TDD_sigmoid_min: " + TDD_sigmoid_min;
-   return log_dyn_enabled + log_sigmoid_enabled + log_enableDynCR + log_myGlucose + log_target + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_Average + log_average_total_data + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min;
-
+       
     // Define a TDD Factor Sigmoid curve using same method as the DynISF Sigmoid approach below
     const TDD_sigmoid_interval = TDD_sigmoid_max - TDD_sigmoid_min;
     const TDD_sigmoid_max_minus_one = TDD_sigmoid_max - 1;
@@ -143,7 +137,9 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
         log_modified_tdd_factor = "Log: modified_tdd_factor: " + modified_tdd_factor;
 
-
+// Return Log to Test Function Operation
+   return log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor
+       
 // The Dynamic ISF Sigmoid Code 
 
       const ratioInterval = maximumRatio - minimumRatio;
