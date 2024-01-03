@@ -145,10 +145,10 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
       const ratioInterval = maximumRatio - minimumRatio;
        var max_minus_one = maximumRatio - 1;
 
-      log_minimumRatio = "Log: minimumRatio: " + minimumRatio;
-      log_maximumRatio  = "Log: maximumRatio: " + maximumRatio;
-      log_ratioInterval  = "Log: ratioInterval: " + ratioInterval;
-      log_max_minus_one  = "Log: max_minus_one: " + max_minus_one;
+      log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
+      log_maximumRatio  = ", Log: maximumRatio: " + maximumRatio;
+      log_ratioInterval  = ", Log: ratioInterval: " + ratioInterval;
+      log_max_minus_one  = ", Log: max_minus_one: " + max_minus_one;
 
 
       // DYNISF SIGMOID MODIFICATION #2
@@ -159,29 +159,29 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // ORIGINAL SIGMOID APPROACH: const bg_dev = (current_bg - profile.min_bg) * 0.0555;
 
     const deviation = (myGlucose - (target / modified_tdd_factor)) * 0.0555; 
-       log_deviation  = "Log: deviation: " + deviation;
+       log_deviation  = ", Log: deviation: " + deviation;
        
      //Makes sigmoid factor(y) = 1 when BG deviation(x) = 0.
      const fix_offset = (Math.log10(1/max_minus_one-minimumRatio/max_minus_one) / Math.log10(Math.E));
-       log_fix_offset  = "Log: fix_offset: " + fix_offset;
+       log_fix_offset  = ", Log: fix_offset: " + fix_offset;
        
      //Exponent used in sigmoid formula
      const exponent = deviation * adjustmentFactor * modified_tdd_factor + fix_offset;
-       log_exponent  = "Log: exponent: " + exponent;
+       log_exponent  = ", Log: exponent: " + exponent;
        
      // The sigmoid function
      var sigmoidFactor = ratioInterval / (1 + Math.exp(-exponent)) + minimumRatio;
-       log_sigmoidFactor  = "Log: sigmoidFactor: " + sigmoidFactor;
+       log_sigmoidFactor  = ", Log: sigmoidFactor: " + sigmoidFactor;
        
      //Respect min/max ratios
      sigmoidFactor = Math.max(Math.min(maximumRatio, sigmoidFactor), sigmoidFactor, minimumRatio);
-       log_minmax_sigmoidFactor  = "Log: sigmoidFactor post min/max: " + sigmoidFactor;
+       log_minmax_sigmoidFactor  = ", Log: sigmoidFactor post min/max: " + sigmoidFactor;
 
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
        
    // Return Log to Test Function Operation
-   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor
+   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor
        
        
        const normal_cr = profile.carb_ratio;
