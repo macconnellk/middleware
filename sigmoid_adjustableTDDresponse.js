@@ -37,7 +37,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    var log_fix_offset = "";
    var log_exponent = "";
    var log_sigmoidFactor = "";
-   var logminmax_sigmoidFactor = "";
+   var log_minmax_sigmoidFactor = "";
    var log_normal_cr = "";
    var log_new_isf = "";
    
@@ -139,9 +139,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
         log_modified_tdd_factor = ", Log: modified_tdd_factor: " + modified_tdd_factor;
 
-// Return Log to Test Function Operation
-   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor
-       
+
 // The Dynamic ISF Sigmoid Code 
 
       const ratioInterval = maximumRatio - minimumRatio;
@@ -177,12 +175,16 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
        
      //Respect min/max ratios
      sigmoidFactor = Math.max(Math.min(maximumRatio, sigmoidFactor), sigmoidFactor, minimumRatio);
-       logminmax_sigmoidFactor  = "Log: sigmoidFactor post min/max: " + sigmoidFactor;
+       log_minmax_sigmoidFactor  = "Log: sigmoidFactor post min/max: " + sigmoidFactor;
 
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
        
-    const normal_cr = profile.carb_ratio;
+   // Return Log to Test Function Operation
+   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor
+       
+       
+       const normal_cr = profile.carb_ratio;
       log_normal_cr = "Log: normal_cr: " + normal_cr;
 
 
