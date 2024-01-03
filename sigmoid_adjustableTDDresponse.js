@@ -108,7 +108,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // These inputs are not expected to require user change for ultra-rapid insulin; instead the strength of this factor can be modified below using the tdd_factor_strength_slider.
     // To model the effects of any changes to these values, or adjust for RAPID insulin, see: https://docs.google.com/spreadsheets/d/1k4sGaZYf2t-FbfY8rViqvUnARx_Gu5K_869AH2wgg_A/edit?usp=sharing
     const TDD_sigmoid_adjustment_factor = .42;
-    const TDD_sigmoid_max = 4;
+    const TDD_sigmoid_max = 3.25;
     const TDD_sigmoid_min = .7;
       log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
       log_TDD_sigmoid_max = ", Log: TDD_sigmoid_max: " + TDD_sigmoid_max;
