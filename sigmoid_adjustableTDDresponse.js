@@ -57,8 +57,9 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   var exerciseSetting = false;
   const target = profile.min_bg;
   const adjustmentFactor = profile.adjustmentFactor;
-   const weightedAverage = oref2_variables.weightedAverage;
+   const past2hoursAverage = oref2_variables.past2hoursAverage;
    const average_total_data = oref2_variables.average_total_data;
+   const weightedAverage = oref2_variables.weightedAverage;
    const duration = oref2_variables.duration;
    const date = oref2_variables.date;
    const isf = oref2_variables.isf;
@@ -69,11 +70,12 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
          log_target = ", Log: target: " + target;
          log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
-         log_weightedAverage = "Log: weightedAverage: " + weightedAverage; 
-         log_average_total_data = "Log: average_total_data: " + average_total_data;
-         var log_duration = "Log: duration: " + duration;
-         var log_date = "Log: date: " + date;
-         var log_isf = "Log: isf: " + isf;
+         log_past2hoursAverage = ", Log: past2hoursAverage: " + past2hoursAverage; 
+         log_average_total_data = ", Log: average_total_data: " + average_total_data;
+         log_weightedAverage = ", Log: weightedAverage: " + weightedAverage;
+         var log_duration = ", Log: duration: " + duration;
+         var log_date = ", Log: date: " + date;
+         var log_isf = ", Log: isf: " + isf;
          
 
 // Establish Guards
@@ -119,26 +121,26 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     const TDD_sigmoid_max_minus_one = TDD_sigmoid_max - 1;
     const TDD_sigmoid_fix_offset = (Math.log10(1/TDD_sigmoid_max_minus_one - TDD_sigmoid_min / TDD_sigmoid_max_minus_one) / Math.log10(Math.E));
     const TDD_sigmoid_exponent = tdd_dev * TDD_sigmoid_adjustment_factor + TDD_sigmoid_fix_offset;
-      log_TDD_sigmoid_interval = "Log: TDD_sigmoid_interval: " + TDD_sigmoid_interval;
-      log_TDD_sigmoid_max_minus_one = "Log: TDD_sigmoid_max_minus_one: " + TDD_sigmoid_max_minus_one;
-      log_TDD_sigmoid_fix_offset = "Log: TDD_sigmoid_fix_offset: " + TDD_sigmoid_fix_offset;
-      log_TDD_sigmoid_exponent = "Log: TDD_sigmoid_exponent: " + TDD_sigmoid_exponent;
+      log_TDD_sigmoid_interval = ", Log: TDD_sigmoid_interval: " + TDD_sigmoid_interval;
+      log_TDD_sigmoid_max_minus_one = ", Log: TDD_sigmoid_max_minus_one: " + TDD_sigmoid_max_minus_one;
+      log_TDD_sigmoid_fix_offset = ", Log: TDD_sigmoid_fix_offset: " + TDD_sigmoid_fix_offset;
+      log_TDD_sigmoid_exponent = ", Log: TDD_sigmoid_exponent: " + TDD_sigmoid_exponent;
        
     // The TDD Factor sigmoid function
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigmoid_exponent)) + TDD_sigmoid_min;
-       log_tdd_factor = "Log: tdd_factor: " + tdd_factor;
+       log_tdd_factor = ", Log: tdd_factor: " + tdd_factor;
 
     // Adjust the stregnth of the TDD Factor; 100% = FULL TDD delta effect similar to Chris Wilson (Logarithmic) DynISF, 50% = half the effect, etc.
     const tdd_factor_strength_slider = 1;
-       log_tdd_factor_strength_slider = "Log: tdd_factor: " + tdd_factor;
+       log_tdd_factor_strength_slider = ", Log: log_tdd_factor_strength_slider: " + tdd_factor_strength_slider;
 
 
     // The user adjusted TDD factor based on above % slider
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
-        log_modified_tdd_factor = "Log: modified_tdd_factor: " + modified_tdd_factor;
+        log_modified_tdd_factor = ", Log: modified_tdd_factor: " + modified_tdd_factor;
 
 // Return Log to Test Function Operation
-   return log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor
+   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor
        
 // The Dynamic ISF Sigmoid Code 
 
