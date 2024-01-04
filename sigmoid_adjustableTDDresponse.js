@@ -62,7 +62,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    const weightedAverage = oref2_variables.weightedAverage;
    const duration = oref2_variables.duration;
    const date = oref2_variables.date;
-   const isf = oref2_variables.isf;
+   const isf = profile.sens;
 
          //  Log function variables
          log_myGlucose = ", Log: myGlucose: " + myGlucose;
@@ -109,7 +109,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
     // These inputs have been modeled to create a TDD Factor that, when used in the Sigmoid DynISF function, closely approximates the TDD delta effect for ULTRA-RAPID used in the Chris Wilson (Logarithmic) DynISF approach. 
     // These inputs are not expected to require user change for ultra-rapid insulin; instead the strength of this factor can be modified below using the tdd_factor_strength_slider.
     // To model the effects of any changes to these values, or adjust for RAPID insulin, see: https://docs.google.com/spreadsheets/d/1k4sGaZYf2t-FbfY8rViqvUnARx_Gu5K_869AH2wgg_A/edit?usp=sharing
-    const TDD_sigmoid_adjustment_factor = .42;
+    const TDD_sigmoid_adjustment_factor = .41;
     const TDD_sigmoid_max = 3.25;
     const TDD_sigmoid_min = .7;
       log_TDD_sigmoid_adjustment_factor = ", Log: TDD_sigmoid_adjustment_factor: " + TDD_sigmoid_adjustment_factor;
@@ -180,10 +180,6 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
        
-   // Return Log to Test Function Operation
-   return log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor
-       
-       
        const normal_cr = profile.carb_ratio;
       log_normal_cr = "Log: normal_cr: " + normal_cr;
 
@@ -194,7 +190,11 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
         const new_isf = profile.sens/autosens.ratio;
-          log_new_isf = "Log: new_isf: " + new_isf;
+          log_new_isf = ", Log: new_isf: " + new_isf;
+
+        // Return Log to Test Function Operation
+   return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_new_isf;
+       
         
         return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + " mg/dl (" + round(0.0555 * new_isf, 2) + " (mmol/l)" + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " (" + round(0.0555 * profile.carb_ratio, 2) + " mmol/l).";
     } else { return "Nothing changed"; }
