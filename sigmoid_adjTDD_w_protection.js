@@ -92,7 +92,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // Sigmoid Function
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
-    if (enable_sigmoidTDD && !dyn_enabled && sigmoid_enabled) { 
+    if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
    
 // DYNISF SIGMOID MODIFICATION #1
 // Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
@@ -192,9 +192,9 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         const new_isf = profile.sens/autosens.ratio;
           log_new_isf = ", Log: new_isf: " + new_isf;
 
-       // Use autosens.ratio variable to Display additional info in enacted pop-up
-       autosens.ratio = "" + sigmoidFactor + past2hoursAverage + average_total_data + weightedAverage;
-       var log_autosens_ratio_info = ", Log: autosens ratio info pop-up: " + autosens.ratio;
+       // Use TDD variable to Display additional info in enacted pop-up
+       oref2_variables.past2hoursAverage = "" + round(sigmoidFactor,2) + round(past2hoursAverage,2) + round(average_total_data,2) + round(weightedAverage,2);
+       var log_TDD_info = ", Log: TDD info pop-up: " + oref2_variables.past2hoursAverage ;
 
         // Return Log to Test Function Operation
    return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_new_isf + log_autosens_ratio_info;
