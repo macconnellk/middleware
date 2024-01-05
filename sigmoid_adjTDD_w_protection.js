@@ -56,13 +56,14 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   const maximumRatio = profile.autosens_max;
   var exerciseSetting = false;
   const target = profile.min_bg;
-  const adjustmentFactor = profile.adjustmentFactor;
    const past2hoursAverage = oref2_variables.past2hoursAverage;
    const average_total_data = oref2_variables.average_total_data;
    const weightedAverage = oref2_variables.weightedAverage;
    const duration = oref2_variables.duration;
    const date = oref2_variables.date;
    const isf = profile.sens;
+   // Hard code Sigmoid adjustment factor to allow utilization of profile setting fot info display
+   const adjustmentFactor = .75;
 
          //  Log function variables
          log_myGlucose = ", Log: myGlucose: " + myGlucose;
@@ -92,7 +93,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // Sigmoid Function
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
-    if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
+    if (enable_sigmoidTDD && !dyn_enabled && sigmoid_enabled) { 
    
 // DYNISF SIGMOID MODIFICATION #1
 // Account for delta in TDD of insulin. Define a TDD Factor using a Sigmoid curve that approximates the TDD delta effect used in the Chris Wilson DynISF approach.
@@ -142,8 +143,9 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 
 // The Dynamic ISF Sigmoid Code 
 
+      
       const ratioInterval = maximumRatio - minimumRatio;
-       var max_minus_one = maximumRatio - 1;
+      var max_minus_one = maximumRatio - 1;
 
       log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
       log_maximumRatio  = ", Log: maximumRatio: " + maximumRatio;
@@ -180,8 +182,11 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
       // Sets the new ratio
      autosens.ratio = sigmoidFactor;
        
-       const normal_cr = profile.carb_ratio;
+      const normal_cr = profile.carb_ratio;
       log_normal_cr = "Log: normal_cr: " + normal_cr;
+
+       // Use Adjustment Factor Variable to Display info in enacted pop-up
+       profile.adjustmentFactor = "" + past2hoursAverage + average_total_data + weightedAverage;
 
 
         // Dynamic CR. Use only when the setting 'Enable Dyanmic CR' is on in FAX Dynamic Settings
