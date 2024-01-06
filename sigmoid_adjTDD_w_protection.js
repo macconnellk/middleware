@@ -89,8 +89,14 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   if (target >= 118 && exerciseSetting) {
       enable_sigmoidTDD = false;
   }
-    
-// Sigmoid Function
+
+// Sensitivity Protection Mechanism: If 24hr TDD is less than 2-Week TDD (sensitive), use 24hr TDD value for weighted average TDD)
+   if (past2hoursAverage < average_total_data) {
+      weightedAverage = past2hoursAverage;
+      log_weightedAverage = ", Log: weightedAverage has been adjusted to 24hr TDD due to sensitivity protection mechanism: " + weightedAverage;
+   }
+   
+// The Sigmoid Function
    
 //Only use when dynISF setting is off and Sigmoid is off and the constant enable_sigmoidTDD = true.
     if (enable_sigmoidTDD && !dyn_enabled && !sigmoid_enabled) { 
@@ -142,7 +148,6 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 
 
 // The Dynamic ISF Sigmoid Code 
-
       
       const ratioInterval = maximumRatio - minimumRatio;
       var max_minus_one = maximumRatio - 1;
@@ -194,7 +199,6 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         const new_isf = profile.sens/autosens.ratio;
           log_new_isf = ", Log: new_isf: " + new_isf;
 
-   
 
         // Return Log to Test Function Operation
    return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_autosensratio + log_new_isf;
