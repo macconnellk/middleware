@@ -70,9 +70,9 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
          log_target = ", Log: target: " + target;
          log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
-         log_past2hoursAverage = ", Log: past2hoursAverage: " + past2hoursAverage; 
-         log_average_total_data = ", Log: average_total_data: " + average_total_data;
-         log_weightedAverage = ", Log: weightedAverage: " + weightedAverage;
+         log_past2hoursAverage = ", Log: 24hr TDD: " + past2hoursAverage; 
+         log_average_total_data = ", Log: 2-week TDD: " + average_total_data;
+         log_weightedAverage = ", Log: TDD Weighted Average: " + weightedAverage;
          var log_duration = ", Log: duration: " + duration;
          var log_date = ", Log: date: " + date;
          var log_isf = ", Log: isf: " + isf;
@@ -88,6 +88,12 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   if (target >= 118 && exerciseSetting) {
       enable_sigmoidTDD = false;
   }
+   
+// Sensitivity Protection Mechanism: If 24hr TDD is less than 2-Week TDD (more sensitive), set weighted average TDD to the 24hr TDD value)
+   if (past2hoursAverage < average_total_data) {
+      weightedAverage = past2hoursAverage;
+      log_weightedAverage = ", Sensitivity protection on: Weighted Average adjusted to 24hr TDD: " + weightedAverage;
+   }
     
 // Sigmoid Function
    
@@ -192,10 +198,14 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         const new_isf = profile.sens/autosens.ratio;
           log_new_isf = ", Log: new_isf: " + new_isf;
 
-        // Return Log to Test Function Operation
-   return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_new_isf;
+      // Return Function Main Data
+   return "Middleware: autosens ratio has been adjusted from: " + log_isf + " to " + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
        
-        
-        // return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + " mg/dl (" + round(0.0555 * new_isf, 2) + " (mmol/l)" + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " (" + round(0.0555 * profile.carb_ratio, 2) + " mmol/l).";
+       
+// Return All Function Data to Test Middleware Function Operation
+//return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_new_isf;
+       
+// Original Sigmoid Return         
+// return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + " mg/dl (" + round(0.0555 * new_isf, 2) + " (mmol/l)" + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " (" + round(0.0555 * profile.carb_ratio, 2) + " mmol/l).";
     } else { return "Nothing changed"; }
 }
