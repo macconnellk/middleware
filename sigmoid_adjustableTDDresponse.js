@@ -59,7 +59,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   const adjustmentFactor = profile.adjustmentFactor;
    const past2hoursAverage = oref2_variables.past2hoursAverage;
    const average_total_data = oref2_variables.average_total_data;
-   const weightedAverage = oref2_variables.weightedAverage;
+   var weightedAverage = oref2_variables.weightedAverage;
    const duration = oref2_variables.duration;
    const date = oref2_variables.date;
    const isf = profile.sens;
