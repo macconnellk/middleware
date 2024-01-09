@@ -65,17 +65,17 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    const isf = profile.sens;
 
          //  Log function variables
-         log_myGlucose = ", Log: myGlucose: " + myGlucose;
+         log_myGlucose = ", myGlucose: " + myGlucose;
          log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
-         log_target = ", Log: target: " + target;
+         log_target = ", Target: " + target;
          log_adjustmentFactor = ", Log: adjustmentFactor: " + adjustmentFactor;
-         log_past2hoursAverage = ", Log: 24hr TDD: " + past2hoursAverage; 
-         log_average_total_data = ", Log: 2-week TDD: " + average_total_data;
-         log_weightedAverage = ", Log: TDD Weighted Average: " + weightedAverage;
+         log_past2hoursAverage = ", 24hr TDD: " + round(past2hoursAverage, 2); 
+         log_average_total_data = ", 2-week TDD: " + round(average_total_data, 2);
+         log_weightedAverage = ", Log: TDD Weighted Average: " + round(weightedAverage, 2);
          var log_duration = ", Log: duration: " + duration;
          var log_date = ", Log: date: " + date;
-         var log_isf = ", Log: isf: " + isf;
+         var log_isf = ", Profile ISF: " + isf;
          
 
 // Establish Guards
@@ -92,7 +92,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // Sensitivity Protection Mechanism: If 24hr TDD is less than 2-Week TDD (more sensitive), set weighted average TDD to the 24hr TDD value)
    if (past2hoursAverage < average_total_data) {
       weightedAverage = past2hoursAverage;
-      log_weightedAverage = ", Sensitivity protection on: Weighted Average adjusted to 24hr TDD: " + weightedAverage;
+      log_weightedAverage = ", Sensitivity protection on: Weighted Average adjusted to 24hr TDD: " + round(weightedAverage, 2);
    }
     
 // Sigmoid Function
@@ -134,7 +134,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
        
     // The TDD Factor sigmoid function
     const tdd_factor = TDD_sigmoid_interval / (1 + Math.exp(-TDD_sigmoid_exponent)) + TDD_sigmoid_min;
-       log_tdd_factor = ", Log: tdd_factor: " + tdd_factor;
+       log_tdd_factor = ", Log: tdd_factor: " + round(tdd_factor, 2);
 
     // Adjust the stregnth of the TDD Factor; 100% = FULL TDD delta effect similar to Chris Wilson (Logarithmic) DynISF, 50% = half the effect, etc.
     const tdd_factor_strength_slider = 1;
@@ -196,10 +196,10 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
         const new_isf = profile.sens/autosens.ratio;
-          log_new_isf = ", Log: new_isf: " + new_isf;
+          log_new_isf = ", New isf: " + new_isf;
 
       // Return Function Main Data
-   return "Middleware: autosens ratio has been adjusted from: " + log_isf + " to " + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
+   return "Autosens ratio adjusted from: " + log_isf + " to " + round(log_new_isf, 2) + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
        
        
 // Return All Function Data to Test Middleware Function Operation
