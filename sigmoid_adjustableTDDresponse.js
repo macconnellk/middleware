@@ -68,7 +68,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_myGlucose = "myGlucose: " + myGlucose + ", ";
          log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
-         log_target = "Target: " + target + ", ";
+         log_target = "Target: " + target;
          log_adjustmentFactor = "AdjustmentFactor: " + adjustmentFactor;
          log_past2hoursAverage = "24hr TDD: " + round(past2hoursAverage, 2); 
          log_average_total_data = "2-week TDD: " + round(average_total_data, 2);
