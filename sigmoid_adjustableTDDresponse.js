@@ -69,10 +69,10 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
          log_minimumRatio = ", Log: minimumRatio: " + minimumRatio;
          log_maximumRatio = ", Log: maximumRatio: " + maximumRatio;
          log_target = "Target: " + target + ", ";
-         log_adjustmentFactor = "AdjustmentFactor: " + adjustmentFactor + ", ";
-         log_past2hoursAverage = "24hr TDD: " + round(past2hoursAverage, 2) + ", "; 
-         log_average_total_data = "2-week TDD: " + round(average_total_data, 2) + ", ";
-         log_weightedAverage = "TDD Weighted Average: " + round(weightedAverage, 2) + ", ";
+         log_adjustmentFactor = "AdjustmentFactor: " + adjustmentFactor;
+         log_past2hoursAverage = "24hr TDD: " + round(past2hoursAverage, 2); 
+         log_average_total_data = "2-week TDD: " + round(average_total_data, 2);
+         log_weightedAverage = "TDD Weighted Average: " + round(weightedAverage, 2);
          var log_duration = ", Log: duration: " + duration;
          var log_date = ", Log: date: " + date;
          var log_isf = "Profile ISF: " + isf;
@@ -92,7 +92,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // Sensitivity Protection Mechanism: If 24hr TDD is less than 2-Week TDD (more sensitive), set weighted average TDD to the 24hr TDD value)
    if (past2hoursAverage < average_total_data) {
       weightedAverage = past2hoursAverage;
-      log_weightedAverage = "Protection Mechanism on: Weighted Average adjusted to: " + round(weightedAverage, 2) + ", ";
+      log_weightedAverage = "Protection Mechanism on: Weighted Average adjusted to: " + round(weightedAverage, 2);
    }
     
 // Sigmoid Function
@@ -143,7 +143,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 
     // The user adjusted TDD factor based on above % slider
     const modified_tdd_factor = ((tdd_factor - 1) * tdd_factor_strength_slider) + 1;
-        log_modified_tdd_factor = "Modified_tdd_factor: " + round(modified_tdd_factor, 2) + ", ";
+        log_modified_tdd_factor = "Modified_tdd_factor: " + round(modified_tdd_factor, 2);
 
 
 // The Dynamic ISF Sigmoid Code 
@@ -195,11 +195,11 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
             profile.carb_ratio /= ((autosens.ratio - 1) / 2 + 1);
         } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
-        const new_isf = profile.sens/autosens.ratio;
-          log_new_isf = "New ISF: " + round(new_isf, 2) + ", ";
+        const new_isf = round(profile.sens/autosens.ratio,0);
+          log_new_isf = "New ISF: " + new_isf;
 
       // Return Function Main Data
-   return "Autosens ratio adjusted from: " + log_isf + " to" + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
+   return "Autosens ratio adjusted from: " + log_isf + " to" + log_new_isf + ", " + log_past2hoursAverage + ", " +  log_average_total_data + ", " +  log_weightedAverage + ", " +  log_modified_tdd_factor + ", " +  log_myGlucose + ", " +  log_target + ", " +  log_adjustmentFactor;  
        
        
 // Return All Function Data to Test Middleware Function Operation
