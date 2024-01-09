@@ -196,7 +196,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
         const new_isf = profile.sens/autosens.ratio;
-          log_new_isf = ", New ISF: " + round(new_isf, 2);
+          log_new_isf = "New ISF: " + round(new_isf, 2);
 
       // Return Function Main Data
    return "Autosens ratio adjusted from: " + log_isf + " to" + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
