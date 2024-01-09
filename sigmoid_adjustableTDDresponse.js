@@ -92,7 +92,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // Sensitivity Protection Mechanism: If 24hr TDD is less than 2-Week TDD (more sensitive), set weighted average TDD to the 24hr TDD value)
    if (past2hoursAverage < average_total_data) {
       weightedAverage = past2hoursAverage;
-      log_weightedAverage = ", Sensitivity protect on: Weighted Average adjusted: " + round(weightedAverage, 2);
+      log_weightedAverage = ", TDD Protection Mechanism on: Weighted Average adjusted: " + round(weightedAverage, 2);
    }
     
 // Sigmoid Function
@@ -196,10 +196,10 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         } else if (enableDynCR) { profile.carb_ratio /= autosens.ratio; }
 
         const new_isf = profile.sens/autosens.ratio;
-          log_new_isf = ", New isf: " + round(new_isf, 2);
+          log_new_isf = ", New ISF: " + round(new_isf, 2);
 
       // Return Function Main Data
-   return "Autosens ratio adjusted from: " + log_isf + " to " + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
+   return "Autosens ratio adjusted from: " + log_isf + " to" + log_new_isf + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_modified_tdd_factor + log_myGlucose + log_target + log_adjustmentFactor;  
        
        
 // Return All Function Data to Test Middleware Function Operation
