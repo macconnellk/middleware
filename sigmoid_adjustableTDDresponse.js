@@ -40,7 +40,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    var log_minmax_sigmoidFactor = "";
    var log_normal_cr = "";
    var log_new_isf = "";
-   var log_protectionmechanism = "Protection Mechanism is Off"'
+   var log_protectionmechanism = "Protection Mechanism is Off";
    
    // The Middleware Sigmoid Function will only run if both Dynamic ISF and Sigmoid ISF are OFF and the above variable enable_sigmoidTDD is true
    // Initialize Dynamic Status Variables
