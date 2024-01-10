@@ -5,6 +5,8 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   const target = profile.min_bg;
   var smb_delivery_ratio = profile.smb_delivery_ratio;
 
+return smb_delivery_ratio;
+
 // User-Defined function settings
   const smb_delivery_ratio_min = profile.smb_delivery_ratio;
   const smb_delivery_ratio_max = 1;
