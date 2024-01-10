@@ -18,7 +18,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
    }
 
   // If BG above user-defined BG range, use SMB ratio max
-  if (myGlucose > target + smb_delivery_ratio_bg_range) {
+  if (myGlucose > (target + smb_delivery_ratio_bg_range)) {
         smb_delivery_ratio = smb_delivery_ratio_max;
    }
   
