@@ -227,6 +227,6 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   
   profile.smb_delivery_ratio = round(smb_delivery_ratio,2);
                         
- return "Using RoboSurf the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " 24hr TDD: " + round(past2hoursAverage, 2) + " 2-week TDD: " + round(average_total_data, 2) + " TDD Weighted Average: " + round(weightedAverage, 2) + log_protectionmechanism + ". SMB Delivery Ratip adjusted to: " + profile.smb_delivery_ratio;
+ return "Using RoboSurf the autosens ratio has been set to: " + round(autosens.ratio, 2) + ". " + log_protectionmechanism + " New ISF = " + round(new_isf, 2) + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " 24hr TDD: " + round(past2hoursAverage, 2) + " 2-week TDD: " + round(average_total_data, 2) + " TDD Weighted Average: " + round(weightedAverage, 2) + ". SMB Delivery Ratio set to: " + profile.smb_delivery_ratio;
    
 }
