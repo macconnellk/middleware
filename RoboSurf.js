@@ -5,7 +5,8 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         var scale = Math.pow(10, digits);
         return Math.round(value * scale) / scale; 
     }   
-   
+
+// DYNAMIC ISF: SIGMOID WITH ENHANCED TDD RESPONSE
 //Turn on or off
   var enable_sigmoidTDD = true;
 
@@ -198,12 +199,33 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 
         const new_isf = round(profile.sens/autosens.ratio,0);
           log_new_isf = "New ISF: " + new_isf;
-  
-       
+         
 // Return All Function Data to Test Middleware Function Operation
 //return "Using Middleware function, the autosens ratio has been adjusted with sigmoid factor using the following data: " + log_past2hoursAverage + log_average_total_data + log_weightedAverage + log_tdd_dev + log_TDD_sigmoid_adjustment_factor + log_TDD_sigmoid_max + log_TDD_sigmoid_min + log_TDD_sigmoid_interval + log_TDD_sigmoid_max_minus_one + log_TDD_sigmoid_fix_offset + log_TDD_sigmoid_exponent + log_tdd_factor + log_tdd_factor_strength_slider + log_modified_tdd_factor + log_myGlucose + log_target + log_isf + log_adjustmentFactor + log_minimumRatio + log_maximumRatio + log_ratioInterval + log_max_minus_one + log_deviation + log_fix_offset + log_exponent + log_sigmoidFactor + log_minmax_sigmoidFactor + log_new_isf;
        
-// Original Sigmoid Return         
- return "Using RoboSurf the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " 24hr TDD: " + round(past2hoursAverage, 2) + " 2-week TDD: " + round(average_total_data, 2) + " TDD Weighted Average: " + round(weightedAverage, 2) + log_protectionmechanism;
+// DYNAMIC SMB DELIVERY RATIO
+//  Initialize function variables
+  var smb_delivery_ratio = profile.smb_delivery_ratio;
+  
+// User-Defined function settings
+  const smb_delivery_ratio_min = profile.smb_delivery_ratio;
+  const smb_delivery_ratio_max = 1;
+  const smb_delivery_ratio_bg_range = 45;
+
+// The Scaling Function
+
+  // If BG between target and top of BG Range, scale SMB Delivery ratio
+  if (myGlucose >= target && myGlucose <= (target+smb_delivery_ratio_bg_range)) {
+        smb_delivery_ratio = (myGlucose - target) * ((smb_delivery_ratio_max - smb_delivery_ratio_min) / smb_delivery_ratio_bg_range) + smb_delivery_ratio_min;
+   }
+
+  // If BG above user-defined BG range, use SMB ratio max
+  if (myGlucose > (target + smb_delivery_ratio_bg_range)) {
+        smb_delivery_ratio = smb_delivery_ratio_max;
+   }
+  
+  profile.smb_delivery_ratio = round(smb_delivery_ratio,2);
+                        
+ return "Using RoboSurf the autosens ratio has been adjusted with sigmoid factor to: " + round(autosens.ratio, 2) + ". New ISF = " + round(new_isf, 2) + ". CR adjusted from " + round(normal_cr,2) + " to " + round(profile.carb_ratio,2) + " 24hr TDD: " + round(past2hoursAverage, 2) + " 2-week TDD: " + round(average_total_data, 2) + " TDD Weighted Average: " + round(weightedAverage, 2) + log_protectionmechanism + "SMB Delivery Ratip adjusted to: " + profile.smb_delivery_ratio;
     } else { return "Nothing changed"; }
 }
