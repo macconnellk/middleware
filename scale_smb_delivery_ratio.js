@@ -31,7 +31,7 @@ function round(value, digits) {
   profile.smb_delivery_ratio = round(smb_delivery_ratio,2);
  
 return "Using Middleware function the SMB delivery ratio has been adjusted to: " + round(profile.smb_delivery_ratio, 2) + ".";
-    } else { return "Nothing changed"; }
-}
+
+} 
   
 
