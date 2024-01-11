@@ -1,5 +1,11 @@
 function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock, pumphistory, preferences, basal_profile, oref2_variables) {
 
+function round(value, digits) {
+        if (! digits) { digits = 0; }
+        var scale = Math.pow(10, digits);
+        return Math.round(value * scale) / scale; 
+    }
+
 //  Initialize function variables
   const myGlucose = glucose[0].glucose;
   const target = profile.min_bg;
@@ -22,7 +28,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
         smb_delivery_ratio = smb_delivery_ratio_max;
    }
   
-  profile.smb_delivery_ratio = smb_delivery_ratio;
+  profile.smb_delivery_ratio = round(smb_delivery_ratio,2);
  
 return "Using Middleware function the SMB delivery ratio has been adjusted to: " + round(profile.smb_delivery_ratio, 2) + ".";
     } else { return "Nothing changed"; }
