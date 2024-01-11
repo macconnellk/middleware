@@ -8,7 +8,7 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
 // User-Defined function settings
   const smb_delivery_ratio_min = profile.smb_delivery_ratio;
   const smb_delivery_ratio_max = 1;
-  const smb_delivery_ratio_bg_range = 200;
+  const smb_delivery_ratio_bg_range = 45;
 
 // The Scaling Function
 
@@ -16,9 +16,6 @@ function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoi
   if (myGlucose >= target && myGlucose <= (target+smb_delivery_ratio_bg_range)) {
         smb_delivery_ratio = (myGlucose - target) * ((smb_delivery_ratio_max - smb_delivery_ratio_min) / smb_delivery_ratio_bg_range) + smb_delivery_ratio_min;
    }
-
-return myGlucose + " " + target + " " + smb_delivery_ratio + " " + smb_delivery_ratio_min + " " + smb_delivery_ratio_max + " " + smb_delivery_ratio_bg_range;
-}
 
   // If BG above user-defined BG range, use SMB ratio max
   if (myGlucose > (target + smb_delivery_ratio_bg_range)) {
