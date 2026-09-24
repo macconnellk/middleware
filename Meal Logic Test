@@ -1,0 +1,24 @@
+function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock) {
+    // TEMPORARY DIAGNOSTIC - one loop cycle, then revert.
+    if (!meal) { return "DIAG meal is null"; }
+
+    var d = "DIAG KEYS ";
+    for (var k in meal) { if (meal.hasOwnProperty(k)) { d += k + "/"; } }
+
+    var ad = meal.allDeviations;
+    var isArr = Object.prototype.toString.call(ad) === "[object Array]";
+    d += " AD " + (typeof ad === "undefined" ? "MISSING" : (isArr ? "ARRAY len " + ad.length : typeof ad));
+
+    if (isArr && ad.length > 0) {
+        d += " HEAD " + ad.slice(0, 6).join(" ");
+        d += " TAIL " + ad.slice(-6).join(" ");
+    }
+
+    d += " COB " + meal.mealCOB + " CARBS " + meal.carbs;
+    d += " CURDEV " + meal.currentDeviation;
+    d += " LASTCARB " + meal.lastCarbTime;
+    d += " MEALTIME " + meal.mealTime;
+    d += " NOWMS " + new Date().getTime();
+
+    return d;
+}
