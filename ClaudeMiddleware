@@ -142,8 +142,8 @@ var average_total_data = profile.dynamicVariables.average_total_data;
 var logSleepMode = "";
 
 var clampNote = "";
-if (meal && meal.cobClampDecision === "clamped") {
-    clampNote = " | COB clamp " + meal.orefMealCOB + "\u2192" + meal.mealCOB;
+if (meal && typeof meal.mealCOB === "number" && typeof meal.orefMealCOB === "number" && meal.orefMealCOB > meal.mealCOB) {
+    clampNote = " | COB held " + meal.orefMealCOB + "\u2192" + meal.mealCOB + " (" + (meal.cobClampDecision || "?") + ")";
 }
 
 // **************** PROFILE OVERRIDES ****************
