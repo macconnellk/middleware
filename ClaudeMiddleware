@@ -1,3 +1,5 @@
+// Middleware v2.0 (2026-09-29): override handling removed; native iAPS owns overrides.
+// Sleep mode still raises an override target overnight (stacked, as before v2.0).
 function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock) {
 
 // DECLARE NOW IMMEDIATELY - before any other code
@@ -11,10 +13,10 @@ function round_basal(basal) {
         rounded_basal = Math.round(basal * lowest_rate_scale) / lowest_rate_scale;
     }
     else if (basal < 10) {
-        rounded_basal = Math.round(basal * 20) / 20; 
+        rounded_basal = Math.round(basal * 20) / 20;
     }
     else {
-        rounded_basal = Math.round(basal * 10) / 10; 
+        rounded_basal = Math.round(basal * 10) / 10;
     }
     return rounded_basal;
 }
@@ -22,15 +24,15 @@ function round_basal(basal) {
 function round(value, digits) {
     if (! digits) { digits = 0; }
     var scale = Math.pow(10, digits);
-    return Math.round(value * scale) / scale; 
+    return Math.round(value * scale) / scale;
 }
 
 // **************** CONFIGURATION ****************
 var CONFIG = {
     // Main feature toggle
     enableMiddleware: true,
-    
-    // Sleep Mode  
+
+    // Sleep Mode
     sleepMode: {
         startHour: 21,
         endHour: 3,
@@ -48,8 +50,8 @@ function isTimeInWindow(currentTime, startHour, endHour) {
     start.setHours(startHour, 0, 0, 0);
     var end = new Date(currentTime);
     end.setHours(endHour, 0, 0, 0);
-    
-    return ((currentTime >= start && currentTime <= end) || 
+
+    return ((currentTime >= start && currentTime <= end) ||
             (currentTime <= start && currentTime <= end && start > end) ||
             (currentTime >= start && currentTime >= end && start > end));
 }
@@ -58,10 +60,10 @@ function isTimeInWindow(currentTime, startHour, endHour) {
 
 function applySleepMode(currentTime, currentBG, iob, profile, target) {
     var sleepModeStatus = "";
-    
-    if (isTimeInWindow(currentTime, CONFIG.sleepMode.startHour, CONFIG.sleepMode.endHour) && 
+
+    if (isTimeInWindow(currentTime, CONFIG.sleepMode.startHour, CONFIG.sleepMode.endHour) &&
         currentBG <= CONFIG.sleepMode.bgThreshold) {
-        
+
         // Turn off SMBs and raise target by 10
         profile.enableUAM = false;
         profile.enableSMB_always = false;
@@ -71,14 +73,14 @@ function applySleepMode(currentTime, currentBG, iob, profile, target) {
         profile.enableSMB_high_bg = false;
         var newTarget = target + CONFIG.sleepMode.targetIncrease;
         sleepModeStatus = "SLEEP MODE ON";
-        
+
         // Check for negative IOB (graduated hypo protection)
         if (iob <= CONFIG.sleepMode.hypoIOBThreshold) {
             newTarget = newTarget + CONFIG.sleepMode.hypoTargetIncrease; // Add 40 MORE (total +50)
-            
+
             // Graduated basal factor based on IOB level and current BG
             var basalFactor;
-            
+
             if (currentBG > 140) {
                 basalFactor = 0.95;
                 sleepModeStatus = "SLEEP MODE ON; NEGATIVE BASAL MODE ON (Recovery)";
@@ -95,18 +97,18 @@ function applySleepMode(currentTime, currentBG, iob, profile, target) {
                 basalFactor = 0.9;
                 sleepModeStatus = "SLEEP MODE ON; NEGATIVE BASAL MODE ON (Light)";
             }
-            
-            return { 
-                status: sleepModeStatus, 
-                newTarget: newTarget, 
+
+            return {
+                status: sleepModeStatus,
+                newTarget: newTarget,
                 hypoMode: true,
                 newBasalFactor: basalFactor
             };
         }
-        
+
         return { status: sleepModeStatus, newTarget: newTarget, hypoMode: false };
     }
-    
+
     return { status: sleepModeStatus, newTarget: target, hypoMode: false };
 }
 
@@ -129,7 +131,8 @@ var initialISF = profile.sens;
 var initialCR = profile.carb_ratio;
 var initialCSF = initialISF / initialCR;
 // ISF/CR as prepare/profile.js left them; used to back-compute the carb floor for
-// reporting. Captured here because initialISF/initialCR are mutated by overrides below.
+// reporting. Kept separate from initialISF/initialCR so the floor report is unaffected
+// by any later adjustment to the working values.
 var reportISF = profile.sens;
 var reportCR = profile.carb_ratio;
 var currentBasal = profile.current_basal;
@@ -143,47 +146,15 @@ var logSleepMode = "";
 
 var clampNote = "";
 if (meal && typeof meal.mealCOB === "number" && typeof meal.orefMealCOB === "number" && meal.orefMealCOB > meal.mealCOB) {
-    clampNote = " | COB held " + meal.orefMealCOB + "\u2192" + meal.mealCOB + " (" + (meal.cobClampDecision || "?") + ")";
+    clampNote = " | COB held " + meal.orefMealCOB + "→" + meal.mealCOB + " (" + (meal.cobClampDecision || "?") + ")";
 }
 
 // **************** PROFILE OVERRIDES ****************
-var logOverride = "Off";  
-var useOverride = profile.dynamicVariables ? profile.dynamicVariables.useOverride : false;
-var adjustISF = profile.dynamicVariables ? profile.dynamicVariables.isf : false;
-var adjustCR = profile.dynamicVariables ? profile.dynamicVariables.cr : false;
-var overridePercentage = profile.dynamicVariables ? (profile.dynamicVariables.overridePercentage / 100) : 1;
-var overrideTarget = profile.dynamicVariables ? profile.dynamicVariables.overrideTarget : target;
-var smbisOff = profile.dynamicVariables ? profile.dynamicVariables.smbisOff : false;
-var overrideMaxIOB = profile.dynamicVariables ? profile.dynamicVariables.overrideMaxIOB : false;
-var profilesMaxIOB = profile.dynamicVariables ? profile.dynamicVariables.maxIOB : profile.max_iob;
-
-if (useOverride) {
-    logOverride = "On";
-    
-    // NOTE: Basal is already adjusted by iAPS in the current_basal variable
-    if (overrideTarget >= 80) target = overrideTarget;
-    if (adjustISF) initialISF = round(initialISF / overridePercentage, 0);
-    if (adjustCR) initialCR = round(initialCR / overridePercentage, 2);
-    
-    // Recalculate CSF after potential ISF/CR changes
-    initialCSF = initialISF / initialCR;
-    
-    if (smbisOff) {
-        profile.enableUAM = false;
-        profile.enableSMB_always = false;
-        profile.enableSMB_with_COB = false;
-        profile.enableSMB_after_carbs = false;
-        profile.enableSMB_with_temptarget = false;
-        profile.enableSMB_high_bg = false;
-    }
-    if (overrideMaxIOB) {
-        profile.max_iob = profilesMaxIOB;
-    }
-    
-    // Reset override flags after processing
-    profile.dynamicVariables.useOverride = false;
-    profile.dynamicVariables.overridePercentage = 100;
-}
+// Overrides are applied natively in prepare/determine-basal.js after this middleware
+// returns: basal in prepare/middleware.js, ISF/CR/target/SMB/max IOB in the
+// dynamicVariables.useOverride block. Never write useOverride or overridePercentage: a reset
+// would skip that block. The one permitted write is overrideTarget, in the sleep-mode section.
+var logOverride = (profile.dynamicVariables && profile.dynamicVariables.useOverride) ? "On" : "Off";
 
 // Initialize working variables AFTER profile overrides
 var newISF = initialISF;
@@ -191,9 +162,22 @@ var newCR = initialCR;
 var hypoMode = false;
 
 // **************** APPLY SLEEP MODE ****************
-var sleepMode = applySleepMode(now, currentBG, iobValue, profile, target);
-target = sleepMode.newTarget;
+// With an override target active (and no temp target), the sleep-mode raise stacks on the
+// override target, as it did before v2.0. The native block in prepare/determine-basal.js
+// writes min_bg/max_bg from dynamicVariables.overrideTarget, so the raised value is written
+// there; Auto ISF reads the same field. This is the only dynamicVariables write allowed here.
+var dv = profile.dynamicVariables || {};
+var overrideTargetActive = dv.useOverride === true && typeof dv.overrideTarget === "number" &&
+    dv.overrideTarget >= 80 && !profile.temptargetSet;
+var sleepBaseTarget = overrideTargetActive ? dv.overrideTarget : target;
+var sleepMode = applySleepMode(now, currentBG, iobValue, profile, sleepBaseTarget);
 logSleepMode = sleepMode.status;
+if (sleepMode.status !== "") {
+    target = sleepMode.newTarget;
+    if (overrideTargetActive) {
+        profile.dynamicVariables.overrideTarget = target;
+    }
+}
 
 // Handle hypo mode from sleep mode
 if (sleepMode.hypoMode) {
@@ -230,14 +214,14 @@ var carbFloorGramsPerHour = (reportISF > 0 && reportCR > 0)
     : 0;
 
 // **************** RETURN DETAILED STATUS ****************
-return logSleepMode + 
-       ". Override " + logOverride + 
-       ". ISF was/now " + round(initialISF, 2) + "/" + round(profile.sens, 2) + 
-       " Basal was/now " + oldBasal + "/" + profile.current_basal + 
-       ". CR was/now " + initialCR + "/" + round(profile.carb_ratio, 2) + 
-       " CSF was/now " + round(initialCSF, 2) + "/" + round(checkCSF, 2) + 
+return logSleepMode +
+       ". Override " + logOverride +
+       ". ISF was/now " + round(initialISF, 2) + "/" + round(profile.sens, 2) +
+       " Basal was/now " + oldBasal + "/" + profile.current_basal +
+       ". CR was/now " + initialCR + "/" + round(profile.carb_ratio, 2) +
+       " CSF was/now " + round(initialCSF, 2) + "/" + round(checkCSF, 2) +
        ". Max IOB " + round(profile.max_iob, 2) +
-       ". Carb floor " + round(carbFloorGramsPerHour, 1) + " g/hr (impact " + profile.min_5m_carbimpact + 
+       ". Carb floor " + round(carbFloorGramsPerHour, 1) + " g/hr (impact " + profile.min_5m_carbimpact +
        " ISF " + round(reportISF, 0) + " CR " + round(reportCR, 1) + ")" +
        ". TDD " + round(past2hoursAverage, 2) + " 2week TDD " + round(average_total_data, 2) +
        clampNote;
