@@ -1,3 +1,5 @@
+// Middleware v2.2 (2026-09-30): status line adds Target was/now and a basis tag (MW v2.2; values pre-AutoISF).
+// Middleware v2.1 (2026-09-30): status line reports the override-scaled ISF/CR/max IOB the native block applies.
 // Middleware v2.0 (2026-09-29): override handling removed; native iAPS owns overrides.
 // Sleep mode still raises an override target overnight (stacked, as before v2.0).
 function middleware(iob, currenttemp, glucose, profile, autosens, meal, reservoir, clock) {
@@ -127,6 +129,7 @@ if (!CONFIG.enableMiddleware) {
 // Initialize state variables
 var currentBG = glucose[0].glucose;
 var target = profile.min_bg;
+var scheduledTarget = profile.min_bg; // profile or temp target before sleep mode and overrides; reporting only
 var initialISF = profile.sens;
 var initialCR = profile.carb_ratio;
 var initialCSF = initialISF / initialCR;
@@ -213,17 +216,40 @@ var carbFloorGramsPerHour = (reportISF > 0 && reportCR > 0)
     ? profile.min_5m_carbimpact * reportCR / reportISF * 12
     : 0;
 
+// **************** REPORTED VALUES (DISPLAY ONLY) ****************
+// The native override block in prepare/determine-basal.js scales ISF, CR and max IOB after this
+// middleware returns, while prepare/middleware.js has already scaled basal before it runs. To
+// report every field on one basis, "was" is the scheduled profile value and "now" is the value
+// after this middleware and the native override, using the native block's own rules. Auto ISF
+// and dynamic ISF are applied later still and are not included; oref's reason fields carry them.
+var dvReport = profile.dynamicVariables || {};
+var reportFactor = (dvReport.useOverride && dvReport.overridePercentage > 0) ? dvReport.overridePercentage / 100 : 1;
+var reportScalesISF = reportFactor !== 1 && (dvReport.isfAndCr || dvReport.isf);
+var reportScalesCR = reportFactor !== 1 && (dvReport.isfAndCr || dvReport.cr);
+var effectiveISF = reportScalesISF ? profile.sens / reportFactor : profile.sens;
+var effectiveCR = reportScalesCR ? round(profile.carb_ratio / reportFactor, 1) : profile.carb_ratio;
+var effectiveCSF = (effectiveCR > 0 && effectiveISF > 0) ? effectiveISF / effectiveCR : checkCSF;
+var effectiveMaxIOB = (dvReport.useOverride && dvReport.advancedSettings && dvReport.overrideMaxIOB)
+    ? dvReport.maxIOB : profile.max_iob;
+var scheduledBasal = (typeof profile.old_basal === "number") ? profile.old_basal : oldBasal;
+// Target oref will use: the native block replaces min_bg with overrideTarget (already raised by
+// sleep mode above, when active) unless a temp target is set. Same rule as prepare/determine-basal.js.
+var effectiveTarget = (dvReport.useOverride && dvReport.overrideTarget != 0 && dvReport.overrideTarget != 6 && !profile.temptargetSet)
+    ? dvReport.overrideTarget : profile.min_bg;
+
 // **************** RETURN DETAILED STATUS ****************
 return logSleepMode +
        ". Override " + logOverride +
-       ". ISF was/now " + round(initialISF, 2) + "/" + round(profile.sens, 2) +
-       " Basal was/now " + oldBasal + "/" + profile.current_basal +
-       ". CR was/now " + initialCR + "/" + round(profile.carb_ratio, 2) +
-       " CSF was/now " + round(initialCSF, 2) + "/" + round(checkCSF, 2) +
-       ". Max IOB " + round(profile.max_iob, 2) +
+       ". ISF was/now " + round(initialISF, 2) + "/" + round(effectiveISF, 2) +
+       " Basal was/now " + scheduledBasal + "/" + profile.current_basal +
+       ". CR was/now " + initialCR + "/" + round(effectiveCR, 2) +
+       " CSF was/now " + round(initialCSF, 2) + "/" + round(effectiveCSF, 2) +
+       ". Target was/now " + round(scheduledTarget, 0) + "/" + round(effectiveTarget, 0) +
+       ". Max IOB " + round(effectiveMaxIOB, 2) +
        ". Carb floor " + round(carbFloorGramsPerHour, 1) + " g/hr (impact " + profile.min_5m_carbimpact +
        " ISF " + round(reportISF, 0) + " CR " + round(reportCR, 1) + ")" +
        ". TDD " + round(past2hoursAverage, 2) + " 2week TDD " + round(average_total_data, 2) +
-       clampNote;
+       clampNote +
+       " | MW v2.2 values pre-AutoISF";
 
 }
