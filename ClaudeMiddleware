@@ -1,3 +1,4 @@
+// Middleware v2.3 (2026-10-14): AISF settings token appended (Spec F / DEF-270)
 // Middleware v2.2 (2026-09-30): status line adds Target was/now and a basis tag (MW v2.2; values pre-AutoISF).
 // Middleware v2.1 (2026-09-30): status line reports the override-scaled ISF/CR/max IOB the native block applies.
 // Middleware v2.0 (2026-09-29): override handling removed; native iAPS owns overrides.
@@ -27,6 +28,58 @@ function round(value, digits) {
     if (! digits) { digits = 0; }
     var scale = Math.pow(10, digits);
     return Math.round(value * scale) / scale;
+}
+
+// autoISF settings token for the reason string (Spec F). Nightscout carries no autoISF settings,
+// so this is the tool's only record of them. Values mirror autoisf.js generate(): when an override
+// carries its own autoISF settings, each key present in autoISFoverrides (except id) replaces the
+// base value, as autoisf.js copies it in after this middleware. The night window is the base
+// setting only: the Swift gate (FreeAPSSettings.isNighttime) never reads a preset's copy.
+// Read-only; missing or non-numeric values print as na so the key set never changes.
+function autoIsfToken(profile) {
+    var base = (profile && typeof profile.iaps === "object" && profile.iaps !== null) ? profile.iaps : null;
+    var dv = (profile && profile.dynamicVariables) || {};
+    var ovr = !!(dv.useOverride && dv.aisfOverridden);
+    var ov = (ovr && dv.autoISFoverrides && typeof dv.autoISFoverrides === "object") ? dv.autoISFoverrides : {};
+    function source(key) {
+        if (!base) { return undefined; }
+        if (ovr && key !== "id" && Object.prototype.hasOwnProperty.call(ov, key)) { return ov[key]; }
+        return base[key];
+    }
+    function num(key, dp) {
+        var v = source(key);
+        if (typeof v === "string" && v.trim() !== "") { v = Number(v); }
+        return (typeof v === "number" && isFinite(v)) ? v.toFixed(dp) : "na";
+    }
+    function flag(key) {
+        var v = source(key);
+        return (v === undefined || v === null) ? "na" : (v ? "1" : "0");
+    }
+    function pad2(n) { return (n < 10 ? "0" : "") + n; }
+    function night() {
+        var n = base ? base.nightTime : undefined;
+        if (!n || typeof n !== "object") { return "na"; }
+        if (n.enabled !== true) { return n.enabled === false ? "off" : "na"; }
+        var parts = [n.startHour, n.startMinute, n.endHour, n.endMinute];
+        for (var i = 0; i < parts.length; i++) {
+            if (typeof parts[i] !== "number" || !isFinite(parts[i])) { return "na"; }
+        }
+        return pad2(n.startHour) + ":" + pad2(n.startMinute) + "-" + pad2(n.endHour) + ":" + pad2(n.endMinute);
+    }
+    return "AISF[v2" +
+        " on=" + flag("autoisf") +
+        " min=" + num("autoisf_min", 2) + " max=" + num("autoisf_max", 2) +
+        " dura=" + num("autoISFhourlyChange", 2) +
+        " hi=" + num("higherISFrangeWeight", 2) + " lo=" + num("lowerISFrangeWeight", 2) +
+        " pp=" + num("postMealISFweight", 2) +
+        " acc=" + num("bgAccelISFweight", 2) + " brk=" + num("bgBrakeISFweight", 2) +
+        " accOn=" + flag("enableBGacceleration") +
+        " iobT=" + num("iobThresholdPercent", 0) +
+        " smbMin=" + num("smbDeliveryRatioMin", 2) + " smbMax=" + num("smbDeliveryRatioMax", 2) +
+        " smbRng=" + num("smbDeliveryRatioBGrange", 0) +
+        " b30=" + flag("use_B30") +
+        " ovr=" + (base ? (ovr ? "1" : "0") : "na") +
+        " night=" + night() + "]";
 }
 
 // **************** CONFIGURATION ****************
@@ -250,6 +303,7 @@ return logSleepMode +
        " ISF " + round(reportISF, 0) + " CR " + round(reportCR, 1) + ")" +
        ". TDD " + round(past2hoursAverage, 2) + " 2week TDD " + round(average_total_data, 2) +
        clampNote +
-       " | MW v2.2 values pre-AutoISF";
+       " | MW v2.3 values pre-AutoISF" +
+       " | " + autoIsfToken(profile);
 
 }
